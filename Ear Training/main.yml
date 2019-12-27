@@ -11,12 +11,68 @@ scenario:
   examplePhrases:
     - 'Alexa, open ear Training'
     - 'Alexa, start ear training'
+  reprompts:
+    - " Sorry, can you say that again? "
+    - " I couldn't hear you, try again"
   steps:
 
 
+    
     - name: Initial step
       actions:
-        # This set has links to the 12 notes of the piano.
+      - compareContext:
+          var: '{{repeatedUser}}'
+          is_equal: true
+     # we check whether repeatedUser variable is 1 and if yes -> it is a repeated user
+     # if no -> it is a new one
+      next:
+          'true': Returning User
+          'false': Initial step for new user
+   
+   
+   
+    - name: Initial step for new user
+      actions:
+       - set: 'repeatedUser = true'
+     # Randomize the output! Our ears like variety.
+       - sendText:  ' {{ random(["Hey!", "Hello!"]) }}'
+       - sendText: >
+                 "It looks like you're new here! Welcome! This skill will help you to train your ears."
+                 <break time="1s"/>
+                 " Alexa will play random intervals. Its up to you to identify them by their interval names,"
+                 "For example you can say, 'major third' or, 'perfect fifth'."
+                 <break time="1s"/>
+                 You can say score at anytime to hear your score"
+                 <break time="1s"/>
+                 "If you get confused, you can say help to get more instructions."
+                 <break time="1s"/>
+                 "Are you ready to begin?"
+                 
+       - getInput:
+       
+      next:
+           ok_great: Interval Setup
+           AMAZON.CancelIntent: Exit
+           AMAZON.StopIntent: Exit
+           AMAZON.HelpIntent: Help
+        # Catch all is the possibility to handle unexpected user input. Don't forget to implement it in every
+        # step where you ask for the user input. Here maybe it is better not to exit but to ask again
+        # or clarify.
+           catch_all: Exit
+     
+    - name: Returning User
+      actions:
+       
+        - sendText: ' Welcome  back to ear training! Random intervals will play. Do your best to identify them. '
+        - sendText: ' Do you want to begin? '
+        - getInput:
+      next:
+        ok_great: Interval Setup
+        
+        
+    - name: Interval Setup
+      actions:
+         # This set has links to the 12 notes of the piano.
         - set: >
             interval = [
               { 'question': 'c4',
@@ -72,15 +128,7 @@ scenario:
         - set: 'percentage = 1'
         - set: 'percentage = 0'
         - set: 'testAnswer = "f"'
-        - sendText: ' Welcome to ear training! Random intervals, ascending and descending, will play. Do your best to identify them. '
-        - sendText: ' Do you want to begin? '
-        - getInput:
-      next:
-        ok_great: Question
-        AMAZON.CancelIntent: Exit
-        AMAZON.StopIntent: Exit
-        AMAZON.HelpIntent: Help
-        score_q: Score
+      next: Question
 
     - name: Question
       actions:
@@ -98,13 +146,18 @@ scenario:
                " Heres an interval. "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+        - reprompt: > 
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/> 
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
        
-            
-        - getInput:
+        - getInput:      
       next:
         answer_intent: Check Answer
         next_q: Question
         repeat_q: Repeat
+        
+        
+      
 
     - name: Check Answer
       # Check if the answer was correct
@@ -124,29 +177,7 @@ scenario:
                " Heres your next interval. "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
-        - getInput:
-      next: 
-        answer_intent: Check Answer 2
-        next_q: Next Question
-        else: Incorrect Answer
-        repeat_q: Repeat
-        
-    - name: Check Answer 2
-      # Check if the answer was correct
-      when: 'answer == interval[int_difference | abs].correct_answer'
-      actions:
-        - set: 'counter = counter + 1'
-        - set: 'score = score + 1'
-        - set: 'percentage = (score / counter) * 100'
-        - sendText: '{{ random(["Great!", "You got it!", "Way to go!", "Nice!", "Thats correct!"]) }}'
-        #
-        - set: 'first_random_interval = random(12)'
-        - set: 'second_random_interval = random(12)'
-        - set: 'int_difference = first_random_interval - second_random_interval'
-        - set: 'testAnswer = interval[int_difference  | abs].correct_answer | lower'
-        #
-        - sendText: >  
-               " Heres your next interval. "
+        - reprompt: >
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
         - getInput:
@@ -155,8 +186,9 @@ scenario:
         next_q: Next Question
         else: Incorrect Answer
         repeat_q: Repeat
-          
-
+        
+        
+        
 
     - name: Incorrect Answer
       actions:
@@ -166,6 +198,9 @@ scenario:
         - sendText: "You have scored {{ percentage | round }} percent correct."
         - sendText: >  
                " Try Again! "
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+        - reprompt: >
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
         - getInput:
@@ -204,6 +239,8 @@ scenario:
       entrypoint: true
       actions:
         - sendText: "You have scored {{ percentage | round }} percent correct."
+        - sendText: > 
+                    <break time="1s"/>
         - sendText: "Ready to hear another interval?"
         - getInput:
       next:
