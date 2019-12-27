@@ -1,0 +1,262 @@
+---
+include:
+  - intents.yml
+  - slots.yml
+  - tests.yml
+scenario:
+  name: 'Ear Training'
+  locale: en-US
+  category: EDUCATION_AND_REFERENCE
+  invocation: 'Ear Training'
+  examplePhrases:
+    - 'Alexa, open ear Training'
+    - 'Alexa, start ear training'
+  steps:
+
+
+    - name: Initial step
+      actions:
+        # This set has links to the 12 notes of the piano.
+        - set: >
+            interval = [
+              { 'question': 'c4',
+                  'correct_answer': 'unison'
+                },
+              { 'question': 'c-4',
+                  'correct_answer': 'major seventh'
+                },
+              { 'question': 'd4', 
+                  'correct_answer': 'minor seventh'
+                },
+              { 'question': 'd-4',
+                  'correct_answer': 'major sixth'
+                },
+              { 'question': 'e4',
+                  'correct_answer': 'minor sixth'
+                },
+              { 'question': 'f4',
+                  'correct_answer': 'perfect fifth'
+                },
+              { 'question': 'f-4',
+                  'correct_answer': 'tritone'
+                },
+              { 'question': 'g4', 
+                  'correct_answer': 'perfect fourth'
+                },
+              { 'question': 'g-4',
+                  'correct_answer': 'major third'
+                },
+              { 'question': 'a4',
+                  'correct_answer': 'minor third'
+                },
+              { 'question': 'a-4',
+                  'correct_answer': 'major second'
+                },
+              { 'question': 'b4',
+                  'correct_answer': 'minor second'
+                },
+              { 'question': 'c5',
+                  'correct_answer': 'unison'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'minor second'
+                },
+              { 'question': 'p', 
+                  'correct_answer': 'major second'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'minor third'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'major third'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'perfect fourth'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'tritone'
+                },
+              { 'question': 'p', 
+                  'correct_answer': 'perfect fifth'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'minor sixth'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'major sixth'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'minor seventh'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'major seventh'
+                },
+              { 'question': 'p',
+                  'correct_answer': 'octave'
+                },
+            ]
+       
+        # A variable to hold the interval difference
+        - set: 'int_difference = 1'
+        - set: 'int_difference = 0'
+        # Sorry - but to set an initial score we need to first set it to 1 and then to 0 - it's a Bug. We're on it.
+        # (score / counter) *100 = percentage
+        - set: 'score = 1'
+        - set: 'score = 0'
+        - set: 'counter = 1'
+        - set: 'counter = 0'
+        - set: 'percentage = 1'
+        - set: 'percentage = 0'
+        - set: 'testAnswer = "f"'
+        - sendText: ' Welcome to ear training! Random intervals, ascending and descending, will play. Do your best to identify them. '
+        - sendText: ' Do you want to begin? '
+        - getInput:
+      next:
+        ok_great: Question
+        AMAZON.CancelIntent: Exit
+        AMAZON.StopIntent: Exit
+        AMAZON.HelpIntent: Help
+        score_q: Score
+
+    - name: Question
+      actions:
+        # Enter the total number of questions in the random function
+        # We will save the random number in the last_random_question variable
+        - set: 'first_random_interval = random(12)'
+        - set: 'second_random_interval = random(12)'
+        # Finds the distance between intervals and sets it to the variable
+        - set: 'int_difference = first_random_interval - second_random_interval + 12'
+        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        # Then use this variable as a key to the array we set in the Initial Step
+       
+        # This plays 2 random intervals on the piano
+        - sendText: >  
+               " Heres an interval. "
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+       
+            
+        - getInput:
+      next:
+        answer_intent: Check Answer
+        next_q: Question
+        repeat_q: Repeat
+
+    - name: Check Answer
+      # Check if the answer was correct
+      when: 'answer == interval[int_difference].correct_answer'
+      actions:
+        - set: 'counter = counter + 1'
+        - set: 'score = score + 1'
+        - set: 'percentage = (score / counter) * 100'
+        - sendText: '{{ random(["Great!", "Perfect!", "Way to go!", "Nice!", "Thats correct!"]) }}'
+        #
+        - set: 'first_random_interval = random(12)'
+        - set: 'second_random_interval = random(12)'
+        - set: 'int_difference = first_random_interval - second_random_interval + 12'
+        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        #
+        - sendText: >  
+               " Heres your next interval. "
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+        - getInput:
+      next: 
+        answer_intent: Check Answer 2
+        next_q: Next Question
+        else: Incorrect Answer
+        repeat_q: Repeat
+        
+    - name: Check Answer 2
+      # Check if the answer was correct
+      when: 'answer == interval[int_difference].correct_answer'
+      actions:
+        - set: 'counter = counter + 1'
+        - set: 'score = score + 1'
+        - set: 'percentage = (score / counter) * 100'
+        - sendText: '{{ random(["Great!", "You got it!", "Way to go!", "Nice!", "Thats correct!"]) }}'
+        #
+        - set: 'first_random_interval = random(12)'
+        - set: 'second_random_interval = random(12)'
+        - set: 'int_difference = first_random_interval - second_random_interval + 12'
+        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        #
+        - sendText: >  
+               " Heres your next interval. "
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+        - getInput:
+      next: 
+        answer_intent: Check Answer
+        next_q: Next Question
+        else: Incorrect Answer
+        repeat_q: Repeat
+          
+
+
+    - name: Incorrect Answer
+      actions:
+        - set: 'counter = counter + 1'
+        - sendText: '{{ random(["Nope!", "Not quite!"]) }}'
+        - set: 'percentage = (score / counter) * 100'
+        - sendText: "You have scored {{ percentage | round }} percent correct."
+        - sendText: >  
+               " Try Again! "
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+        - getInput:
+      next:
+        answer_intent: Check Answer
+        next_q: Next Question
+        repeat_q: Repeat
+        
+    - name: Next Question
+      actions:
+        - sendText: "Ok."
+      next: Question
+      
+    - name: Repeat
+      actions:
+        - sendText: "Ok, here's the interval again."
+        - sendText: >  
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+        - getInput:
+      next: 
+        answer_intent: Check Answer
+        repeat_q: Repeat
+        next_q: Next Question
+      
+    - name: Try Again
+      actions:
+        - sendText: 'Try saying an interval name, for example you could say, tritone, or, minor third.'
+        - sendText: 'Are you ready to try again?'
+        - getInput:
+      next: 
+        ok_great: Question
+        no_q: Exit
+      
+    - name: Score
+      entrypoint: true
+      actions:
+        - sendText: "You have scored {{ percentage | round }} percent correct."
+        - sendText: "Ready to hear another interval?"
+        - getInput:
+      next:
+        ok_great: Question
+        no_q: Exit
+      
+      
+    - name: Exit
+      entrypoint: true
+      actions:
+        - sendText: 'Ok, come back soon!'
+
+    - name: Help
+      entrypoint: true
+      actions:
+        - sendText: 'Ascending and descending intervals will play at random, identify the interval. You can ask to repeat or skip an interval. Alexa will keep track of your score. Say score at any time to hear your score. Are you ready?'
+        - getInput:
+      next:
+        ok_great: Question
+        no_q: Exit

@@ -1,0 +1,16 @@
+---
+slots:
+  answer:
+    - unison
+    - minor second
+    - major second
+    - minor third
+    - major third
+    - perfect fourth
+    - tritone
+    - perfect fifth
+    - minor sixth
+    - major sixth
+    - minor seventh
+    - major seventh
+    - octave

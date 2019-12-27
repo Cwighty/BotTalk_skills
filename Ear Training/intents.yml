@@ -1,0 +1,38 @@
+---
+intents:
+  ok_great:
+    - 'OK'
+    - 'Great'
+    - sure
+    - yes
+    - of course
+    - yea
+    - lets do it
+  answer_intent:
+    - '{answer}'
+  next_q:
+    - next
+    - skip
+    - new question
+    - next question
+    - i want a new question
+    - new interval
+    - next interval
+    - i want a new interval
+  repeat_q:
+    - can you play it again
+    - play it again
+    - repeat
+    - repeat it
+    - one more time
+    - can you repeat the interval
+    - repeat the interval
+    - can I hear it again
+  score_q:
+    - score
+    - whats my score
+  no_q:
+    - no
+    - no thanks
+    - no thank you
+    

@@ -1,0 +1,13 @@
+---
+tests:
+
+  Happy Path:
+
+    - say: start
+      await: Somet
+
+    - say: ok_great
+      await: Somet
+      
+    - say: major third
+      await: Somet
