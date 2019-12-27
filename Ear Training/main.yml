@@ -177,9 +177,7 @@ scenario:
                " Heres your next interval. "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
-        - reprompt: >
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+
         - getInput:
       next: 
         answer_intent: Check Answer
@@ -200,9 +198,7 @@ scenario:
                " Try Again! "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
-        - reprompt: >
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+    
         - getInput:
       next:
         answer_intent: Check Answer
