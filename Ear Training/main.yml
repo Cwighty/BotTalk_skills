@@ -108,7 +108,7 @@ scenario:
 
     - name: Check Answer
       # Check if the answer was correct
-      when: 'answer == interval[int_difference].correct_answer'
+      when: 'answer == interval[int_difference | abs].correct_answer'
       actions:
         - set: 'counter = counter + 1'
         - set: 'score = score + 1'
@@ -133,7 +133,7 @@ scenario:
         
     - name: Check Answer 2
       # Check if the answer was correct
-      when: 'answer == interval[int_difference].correct_answer'
+      when: 'answer == interval[int_difference | abs].correct_answer'
       actions:
         - set: 'counter = counter + 1'
         - set: 'score = score + 1'
