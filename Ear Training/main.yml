@@ -23,75 +23,39 @@ scenario:
                   'correct_answer': 'unison'
                 },
               { 'question': 'c-4',
-                  'correct_answer': 'major seventh'
+                  'correct_answer': 'minor second'
                 },
               { 'question': 'd4', 
-                  'correct_answer': 'minor seventh'
+                  'correct_answer': 'major second'
                 },
               { 'question': 'd-4',
-                  'correct_answer': 'major sixth'
+                  'correct_answer': 'minor third'
                 },
               { 'question': 'e4',
-                  'correct_answer': 'minor sixth'
+                  'correct_answer': 'major third'
                 },
               { 'question': 'f4',
-                  'correct_answer': 'perfect fifth'
+                  'correct_answer': 'perfect fourth'
                 },
               { 'question': 'f-4',
                   'correct_answer': 'tritone'
                 },
               { 'question': 'g4', 
-                  'correct_answer': 'perfect fourth'
-                },
-              { 'question': 'g-4',
-                  'correct_answer': 'major third'
-                },
-              { 'question': 'a4',
-                  'correct_answer': 'minor third'
-                },
-              { 'question': 'a-4',
-                  'correct_answer': 'major second'
-                },
-              { 'question': 'b4',
-                  'correct_answer': 'minor second'
-                },
-              { 'question': 'c5',
-                  'correct_answer': 'unison'
-                },
-              { 'question': 'p',
-                  'correct_answer': 'minor second'
-                },
-              { 'question': 'p', 
-                  'correct_answer': 'major second'
-                },
-              { 'question': 'p',
-                  'correct_answer': 'minor third'
-                },
-              { 'question': 'p',
-                  'correct_answer': 'major third'
-                },
-              { 'question': 'p',
-                  'correct_answer': 'perfect fourth'
-                },
-              { 'question': 'p',
-                  'correct_answer': 'tritone'
-                },
-              { 'question': 'p', 
                   'correct_answer': 'perfect fifth'
                 },
-              { 'question': 'p',
+              { 'question': 'g-4',
                   'correct_answer': 'minor sixth'
                 },
-              { 'question': 'p',
+              { 'question': 'a4',
                   'correct_answer': 'major sixth'
                 },
-              { 'question': 'p',
+              { 'question': 'a-4',
                   'correct_answer': 'minor seventh'
                 },
-              { 'question': 'p',
+              { 'question': 'b4',
                   'correct_answer': 'major seventh'
                 },
-              { 'question': 'p',
+              { 'question': 'c5',
                   'correct_answer': 'octave'
                 },
             ]
@@ -125,8 +89,8 @@ scenario:
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
         # Finds the distance between intervals and sets it to the variable
-        - set: 'int_difference = first_random_interval - second_random_interval + 12'
-        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        - set: 'int_difference = first_random_interval - second_random_interval'
+        - set: 'testAnswer = interval[int_difference | abs].correct_answer | lower'
         # Then use this variable as a key to the array we set in the Initial Step
        
         # This plays 2 random intervals on the piano
@@ -144,7 +108,7 @@ scenario:
 
     - name: Check Answer
       # Check if the answer was correct
-      when: 'answer == interval[int_difference].correct_answer'
+      when: 'answer == interval[int_difference | abs].correct_answer'
       actions:
         - set: 'counter = counter + 1'
         - set: 'score = score + 1'
@@ -153,8 +117,8 @@ scenario:
         #
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
-        - set: 'int_difference = first_random_interval - second_random_interval + 12'
-        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        - set: 'int_difference = first_random_interval - second_random_interval'
+        - set: 'testAnswer = interval[int_difference | abs].correct_answer | lower'
         #
         - sendText: >  
                " Heres your next interval. "
@@ -169,7 +133,7 @@ scenario:
         
     - name: Check Answer 2
       # Check if the answer was correct
-      when: 'answer == interval[int_difference].correct_answer'
+      when: 'answer == interval[int_difference | abs].correct_answer'
       actions:
         - set: 'counter = counter + 1'
         - set: 'score = score + 1'
@@ -178,8 +142,8 @@ scenario:
         #
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
-        - set: 'int_difference = first_random_interval - second_random_interval + 12'
-        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        - set: 'int_difference = first_random_interval - second_random_interval'
+        - set: 'testAnswer = interval[int_difference  | abs].correct_answer | lower'
         #
         - sendText: >  
                " Heres your next interval. "
