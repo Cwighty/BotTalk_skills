@@ -68,6 +68,7 @@ scenario:
         - getInput:
       next:
         ok_great: Interval Setup
+        no_q: Exit
         
         
     - name: Interval Setup
@@ -167,6 +168,8 @@ scenario:
         - set: 'score = score + 1'
         - set: 'percentage = (score / counter) * 100'
         - sendText: '{{ random(["Great!", "Perfect!", "Way to go!", "Nice!", "Thats correct!"]) }}'
+        - sendText: >
+                    {% if counter % 10 == "0" %} "You have scored {{ percentage | round }} percent. "{% endif %}
         #
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
@@ -174,7 +177,7 @@ scenario:
         - set: 'testAnswer = interval[int_difference | abs].correct_answer | lower'
         #
         - sendText: >  
-               " Heres your next interval. "
+              {% if counter % 5 == "0" %}  " Heres your next interval. " {% endif %}
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
 
@@ -193,7 +196,8 @@ scenario:
         - set: 'counter = counter + 1'
         - sendText: '{{ random(["Nope!", "Not quite!"]) }}'
         - set: 'percentage = (score / counter) * 100'
-        - sendText: "You have scored {{ percentage | round }} percent correct."
+        - sendText: >
+                    {% if counter % 10 == "0" %} "You have scored {{ percentage | round }} percent. "{% endif %}
         - sendText: >  
                " Try Again! "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
@@ -207,7 +211,7 @@ scenario:
         
     - name: Next Question
       actions:
-        - sendText: "Ok."
+        - sendText: '{{ random(["Ok!", "Sure Thing!", "You got this!"]) }}'
       next: Question
       
     - name: Repeat
