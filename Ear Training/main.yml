@@ -89,8 +89,8 @@ scenario:
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
         # Finds the distance between intervals and sets it to the variable
-        - set: 'int_difference = first_random_interval - second_random_interval | abs'
-        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        - set: 'int_difference = first_random_interval - second_random_interval'
+        - set: 'testAnswer = interval[int_difference | abs].correct_answer | lower'
         # Then use this variable as a key to the array we set in the Initial Step
        
         # This plays 2 random intervals on the piano
@@ -117,8 +117,8 @@ scenario:
         #
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
-        - set: 'int_difference = first_random_interval - second_random_interval + 12'
-        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        - set: 'int_difference = first_random_interval - second_random_interval'
+        - set: 'testAnswer = interval[int_difference | abs].correct_answer | lower'
         #
         - sendText: >  
                " Heres your next interval. "
@@ -142,8 +142,8 @@ scenario:
         #
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
-        - set: 'int_difference = first_random_interval - second_random_interval + 12'
-        - set: 'testAnswer = interval[int_difference].correct_answer | lower'
+        - set: 'int_difference = first_random_interval - second_random_interval'
+        - set: 'testAnswer = interval[int_difference  | abs].correct_answer | lower'
         #
         - sendText: >  
                " Heres your next interval. "
