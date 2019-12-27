@@ -147,9 +147,6 @@ scenario:
                " Heres an interval. "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
-        - reprompt: > 
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/> 
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
        
         - getInput:      
       next:
@@ -256,7 +253,7 @@ scenario:
     - name: Help
       entrypoint: true
       actions:
-        - sendText: 'Ascending and descending intervals will play at random, identify the interval. You can ask to repeat or skip an interval. Alexa will keep track of your score. Say score at any time to hear your score. Are you ready?'
+        - sendText: 'Ascending and descending intervals will play at random, identify the interval. You can ask to repeat or skip an interval. Remember, the interval between a fourth and a fifth is a tritone. Say score at any time to hear your score. Are you ready?'
         - getInput:
       next:
         ok_great: Question
