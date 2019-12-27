@@ -11,6 +11,9 @@ scenario:
   examplePhrases:
     - 'Alexa, open ear Training'
     - 'Alexa, start ear training'
+  reprompts:
+    - " Sorry, can you say that again? "
+    - " I couldn't hear you, try again"
   steps:
 
 
@@ -134,13 +137,18 @@ scenario:
                " Heres an interval. "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+        - reprompt: > 
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/> 
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
        
-            
-        - getInput:
+        - getInput:      
       next:
         answer_intent: Check Answer
         next_q: Question
         repeat_q: Repeat
+        
+        
+      
 
     - name: Check Answer
       # Check if the answer was correct
@@ -160,6 +168,7 @@ scenario:
                " Heres your next interval. "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+<<<<<<< Updated upstream
         - getInput:
       next: 
         answer_intent: Check Answer 2
@@ -183,6 +192,9 @@ scenario:
         #
         - sendText: >  
                " Heres your next interval. "
+=======
+        - reprompt: >
+>>>>>>> Stashed changes
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
         - getInput:
@@ -191,8 +203,9 @@ scenario:
         next_q: Next Question
         else: Incorrect Answer
         repeat_q: Repeat
-          
-
+        
+        
+        
 
     - name: Incorrect Answer
       actions:
@@ -202,6 +215,9 @@ scenario:
         - sendText: "You have scored {{ percentage | round }} percent correct."
         - sendText: >  
                " Try Again! "
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+        - reprompt: >
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
         - getInput:
@@ -240,6 +256,8 @@ scenario:
       entrypoint: true
       actions:
         - sendText: "You have scored {{ percentage | round }} percent correct."
+        - sendText: > 
+                    <break time="1s"/>
         - sendText: "Ready to hear another interval?"
         - getInput:
       next:
