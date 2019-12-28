@@ -4,13 +4,13 @@ include:
   - slots.yml
   - tests.yml
 scenario:
-  name: 'Ear Training'
+  name: 'Interval Vibes'
   locale: en-US
   category: EDUCATION_AND_REFERENCE
-  invocation: 'Ear Training'
+  invocation: 'interval vibes'
   examplePhrases:
-    - 'Alexa, open ear Training'
-    - 'Alexa, start ear training'
+    - 'Alexa, open interval vibes'
+    - 'Alexa, start interval vibes'
   reprompts:
     - " Sorry, can you say that again? "
     - " I couldn't hear you, try again"
@@ -35,12 +35,14 @@ scenario:
       actions:
        - set: 'repeatedUser = true'
      # Randomize the output! Our ears like variety.
-       - sendText:  ' {{ random(["Hey!", "Hello!"]) }}'
+       - sendText:  ' {{ random(["Hey! Welcome to interval vibes!", "Hello! Welcome to interval vibes!"]) }}'
        - sendText: >
-                 "It looks like you're new here! Welcome! This skill will help you to train your ears."
+                 <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/intro.mp3"/>
+                 "It looks like you're new here! This skill will help you to train your ears."
                  <break time="1s"/>
                  " Alexa will play random intervals. Its up to you to identify them by their interval names,"
-                 "For example you can say, 'major third' or, 'perfect fifth'."
+                 "For example you can say, 'major third' or 'perfect fifth'."
+                 "You can say repeat to hear the interval again."
                  <break time="1s"/>
                  You can say score at anytime to hear your score"
                  <break time="1s"/>
@@ -55,6 +57,7 @@ scenario:
            AMAZON.CancelIntent: Exit
            AMAZON.StopIntent: Exit
            AMAZON.HelpIntent: Help
+           score_q: Score
         # Catch all is the possibility to handle unexpected user input. Don't forget to implement it in every
         # step where you ask for the user input. Here maybe it is better not to exit but to ask again
         # or clarify.
@@ -62,8 +65,9 @@ scenario:
      
     - name: Returning User
       actions:
-       
-        - sendText: ' Welcome  back to ear training! Random intervals will play. Do your best to identify them. '
+        - sendText: >
+                    <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/intro.mp3"/>
+        - sendText: ' Welcome back to ear training! Random intervals will play. Do your best to identify them. '
         - sendText: ' Do you want to begin? '
         - getInput:
       next:
@@ -137,6 +141,8 @@ scenario:
         # We will save the random number in the last_random_question variable
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
+        - set: 'firstsfx = random(4)'
+        - set: 'secondsfx = random(4)'
         # Finds the distance between intervals and sets it to the variable
         - set: 'int_difference = first_random_interval - second_random_interval'
         - set: 'testAnswer = interval[int_difference | abs].correct_answer | lower'
@@ -164,7 +170,10 @@ scenario:
         - set: 'counter = counter + 1'
         - set: 'score = score + 1'
         - set: 'percentage = (score / counter) * 100'
-        - sendText: '{{ random(["Great!", "Perfect!", "Way to go!", "Nice!", "Thats correct!"]) }}'
+        - set: 'firstsfx = random(4)'
+        - sendText: >
+                     <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/Correct0{{ firstsfx }}.mp3"/>
+        - sendText: '{{ random(["Great job!", "Way to go!", "Nice!", "Thats correct!"]) }}'
         - sendText: >
                     {% if counter % 10 == "0" %} "You have scored {{ percentage | round }} percent. "{% endif %}
         #
@@ -191,8 +200,11 @@ scenario:
     - name: Incorrect Answer
       actions:
         - set: 'counter = counter + 1'
-        - sendText: '{{ random(["Nope!", "Not quite!"]) }}'
         - set: 'percentage = (score / counter) * 100'
+        - set: 'secondsfx = random(4)'
+        - sendText: >   
+                      <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/Wrong0{{ secondsfx }}.mp3"/>
+        - sendText: '{{ random(["Nope!", "Not quite!",]) }}'
         - sendText: >
                     {% if counter % 10 == "0" %} "You have scored {{ percentage | round }} percent. "{% endif %}
         - sendText: >  
@@ -207,13 +219,15 @@ scenario:
         repeat_q: Repeat
         
     - name: Next Question
+      entrypoint: true
       actions:
-        - sendText: '{{ random(["Ok!", "Sure Thing!", "You got this!"]) }}'
+        - sendText: > 
+                    {{ random(["Ok!", "Sure Thing!", "You got this!"]) }}
       next: Question
       
     - name: Repeat
       actions:
-        - sendText: "Ok, here's the interval again."
+        - sendText: "Ok, heres the interval again."
         - sendText: >  
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
@@ -225,8 +239,8 @@ scenario:
       
     - name: Try Again
       actions:
-        - sendText: 'Try saying an interval name, for example you could say, tritone, or, minor third.'
-        - sendText: 'Are you ready to try again?'
+        - sendText: "Try saying an interval name, for example you could say, tritone, or, minor third."
+        - sendText: "Are you ready to try again?"
         - getInput:
       next: 
         ok_great: Question
@@ -248,13 +262,14 @@ scenario:
     - name: Exit
       entrypoint: true
       actions:
-        - sendText: 'Ok, come back soon!'
+        - sendText: "Ok, come back soon!"
 
     - name: Help
       entrypoint: true
       actions:
-        - sendText: 'Ascending and descending intervals will play at random, identify the interval. You can ask to repeat or skip an interval. Remember, the interval between a fourth and a fifth is a tritone. Say score at any time to hear your score. Are you ready?'
+        - sendText: "Ascending and descending intervals will play at random, identify the interval. You can ask to repeat or skip an interval. Remember, the interval between a fourth and a fifth is a tritone. Say score at any time to hear your score. Are you ready?"
         - getInput:
       next:
         ok_great: Question
         no_q: Exit
+        
