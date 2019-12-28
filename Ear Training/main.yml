@@ -67,7 +67,7 @@ scenario:
       actions:
         - sendText: >
                     <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/intro.mp3"/>
-        - sendText: ' Welcome back to ear training! Random intervals will play. Do your best to identify them. '
+        - sendText: ' Welcome back to Interval Vibes! Random intervals will play. Do your best to identify them. '
         - sendText: ' Do you want to begin? '
         - getInput:
       next:
@@ -130,6 +130,8 @@ scenario:
         - set: 'score = 0'
         - set: 'counter = 1'
         - set: 'counter = 0'
+        - set: 'incorrect_attempts = 1'
+        - set: 'incorrect_attempts = 0'
         - set: 'percentage = 1'
         - set: 'percentage = 0'
         - set: 'testAnswer = "f"'
@@ -170,18 +172,23 @@ scenario:
         - set: 'counter = counter + 1'
         - set: 'score = score + 1'
         - set: 'percentage = (score / counter) * 100'
+        - set: 'incorrect_attempts = 0'
+        # This selects a random sfx and plays it.
         - set: 'firstsfx = random(4)'
         - sendText: >
                      <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/Correct0{{ firstsfx }}.mp3"/>
         - sendText: '{{ random(["Great job!", "Way to go!", "Nice!", "Thats correct!"]) }}'
+        
+        # Provides the score every 10 times.
         - sendText: >
                     {% if counter % 10 == "0" %} "You have scored {{ percentage | round }} percent. "{% endif %}
-        #
+                    
+        # Creates and outputs a new interval
         - set: 'first_random_interval = random(12)'
         - set: 'second_random_interval = random(12)'
         - set: 'int_difference = first_random_interval - second_random_interval'
         - set: 'testAnswer = interval[int_difference | abs].correct_answer | lower'
-        #
+       
         - sendText: >  
               {% if counter % 5 == "0" %}  " Heres your next interval. " {% endif %}
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
@@ -193,31 +200,44 @@ scenario:
         next_q: Next Question
         else: Incorrect Answer
         repeat_q: Repeat
+        catch_all: Try Again
         
         
         
-
+    # What happens if the user answers incorrectly.
     - name: Incorrect Answer
       actions:
         - set: 'counter = counter + 1'
         - set: 'percentage = (score / counter) * 100'
+        
+        # This selects a random sfx and plays it.  
         - set: 'secondsfx = random(4)'
         - sendText: >   
                       <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/Wrong0{{ secondsfx }}.mp3"/>
         - sendText: '{{ random(["Nope!", "Not quite!",]) }}'
+        
+        # Gives the correct answer if user answers incoreectly 3 times
+        - set:       'incorrect_attempts = incorrect_attempts + 1'      
+        - sendText: >  
+                     {% if incorrect_attempts % 3 == 0 %} "Thats incorrect, the correct answer is {{ testAnswer }}." {% endif %}
+        - set:      '{% if incorrect_attempts % 3 == 0 %} incorrect_attempts = 0 {% endif %}'
+
+        # Provides the score every 10 times.
         - sendText: >
                     {% if counter % 10 == "0" %} "You have scored {{ percentage | round }} percent. "{% endif %}
         - sendText: >  
                " Try Again! "
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
-    
         - getInput:
       next:
         answer_intent: Check Answer
         next_q: Next Question
         repeat_q: Repeat
+        catch_all: Try Again
         
+        
+    # If the user asks to skip a question    
     - name: Next Question
       entrypoint: true
       actions:
@@ -225,6 +245,7 @@ scenario:
                     {{ random(["Ok!", "Sure Thing!", "You got this!"]) }}
       next: Question
       
+    # If the user asks to repeat a question
     - name: Repeat
       actions:
         - sendText: "Ok, heres the interval again."
@@ -236,16 +257,19 @@ scenario:
         answer_intent: Check Answer
         repeat_q: Repeat
         next_q: Next Question
+        catch_all: Try Again
       
+      # If the user answers with something other than an interval name.
     - name: Try Again
       actions:
-        - sendText: "Try saying an interval name, for example you could say, tritone, or, minor third."
+        - sendText: "Try saying an interval name, for example you could say, tritone or, minor third."
         - sendText: "Are you ready to try again?"
         - getInput:
       next: 
         ok_great: Question
         no_q: Exit
       
+      # If the user asks to hear their score
     - name: Score
       entrypoint: true
       actions:
