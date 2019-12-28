@@ -16,7 +16,7 @@ scenario:
     - " I couldn't hear you, try again"
   steps:
 
-
+################################## STARTUP AND USER INTERACTION #########################################
     
     - name: Initial step
       actions:
@@ -30,14 +30,15 @@ scenario:
           'false': Initial step for new user
    
    
-   
     - name: Initial step for new user
       actions:
        - set: 'repeatedUser = true'
+       - set: 'soundpack_num = "1"'
+       - set: 'soundpack_num = "0"'
      # Randomize the output! Our ears like variety.
        - sendText:  ' {{ random(["Hey! Welcome to interval vibes!", "Hello! Welcome to interval vibes!"]) }}'
        - sendText: >
-                 <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/intro.mp3"/>
+                 <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/intro.mp3"/>
                  "It looks like you're new here! This skill will help you to train your ears."
                  <break time="1s"/>
                  " Alexa will play random intervals. Its up to you to identify them by their interval names,"
@@ -49,6 +50,7 @@ scenario:
                  "If you get confused, you can say help to get more instructions."
                  <break time="1s"/>
                  "Are you ready to begin?"
+       
                  
        - getInput:
        
@@ -58,6 +60,7 @@ scenario:
            AMAZON.StopIntent: Exit
            AMAZON.HelpIntent: Help
            score_q: Score
+           settings_q: Extra Settings
         # Catch all is the possibility to handle unexpected user input. Don't forget to implement it in every
         # step where you ask for the user input. Here maybe it is better not to exit but to ask again
         # or clarify.
@@ -66,15 +69,26 @@ scenario:
     - name: Returning User
       actions:
         - sendText: >
-                    <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/intro.mp3"/>
+                    <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/intro.mp3"/>
         - sendText: ' Welcome back to Interval Vibes! Random intervals will play. Do your best to identify them. '
         - sendText: ' Do you want to begin? '
         - getInput:
       next:
         ok_great: Interval Setup
         no_q: Exit
+        settings_q: Extra Settings
         
-        
+  
+  
+  
+  
+  
+  
+########################## INTERVAL GAME FUNCTIONS  #################################
+  
+  
+  
+  
     - name: Interval Setup
       actions:
          # This set has links to the 12 notes of the piano.
@@ -137,6 +151,7 @@ scenario:
         - set: 'testAnswer = "f"'
       next: Question
 
+
     - name: Question
       actions:
         # Enter the total number of questions in the random function
@@ -153,17 +168,16 @@ scenario:
         # This plays 2 random intervals on the piano
         - sendText: >  
                " Heres an interval. "
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/{{ interval[second_random_interval].question }}.mp3"/>
        
         - getInput:      
       next:
         answer_intent: Check Answer
         next_q: Question
         repeat_q: Repeat
-        
-        
-      
+        settings_q: Extra Settings
+         
 
     - name: Check Answer
       # Check if the answer was correct
@@ -176,7 +190,7 @@ scenario:
         # This selects a random sfx and plays it.
         - set: 'firstsfx = random(4)'
         - sendText: >
-                     <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/Correct0{{ firstsfx }}.mp3"/>
+                     <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/Correct0{{ firstsfx }}.mp3"/>
         - sendText: '{{ random(["Great job!", "Way to go!", "Nice!", "Thats correct!"]) }}'
         
         # Provides the score every 10 times.
@@ -191,8 +205,8 @@ scenario:
        
         - sendText: >  
               {% if counter % 5 == "0" %}  " Heres your next interval. " {% endif %}
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/{{ interval[second_random_interval].question }}.mp3"/>
 
         - getInput:
       next: 
@@ -201,8 +215,7 @@ scenario:
         else: Incorrect Answer
         repeat_q: Repeat
         catch_all: Try Again
-        
-        
+          
         
     # What happens if the user answers incorrectly.
     - name: Incorrect Answer
@@ -213,7 +226,7 @@ scenario:
         # This selects a random sfx and plays it.  
         - set: 'secondsfx = random(4)'
         - sendText: >   
-                      <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/EarTrainerSFX/Wrong0{{ secondsfx }}.mp3"/>
+                      <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/Wrong0{{ secondsfx }}.mp3"/>
         - sendText: '{{ random(["Nope!", "Not quite!",]) }}'
         
         # Gives the correct answer if user answers incoreectly 3 times
@@ -227,8 +240,8 @@ scenario:
                     {% if counter % 10 == "0" %} "You have scored {{ percentage | round }} percent. "{% endif %}
         - sendText: >  
                " Try Again! "
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/{{ interval[second_random_interval].question }}.mp3"/>
         - getInput:
       next:
         answer_intent: Check Answer
@@ -236,7 +249,54 @@ scenario:
         repeat_q: Repeat
         catch_all: Try Again
         
+  
+  
+  
+  
+  
+###################################### EXTRA FUNCTIONALITY #####################################################
+    - name: Extra Settings
+      entrypoint: true
+      actions:
+        - sendText: > 
+                  "Here you can select a different soundpack to use while you practice."
+                  "You can pick default, retro, or symphonic."
+                  "Which soundpack would you like to use?"
+        - getInput:
+      next:
+        soundpack_q: default
+        retro_q: Retro
+    
+    
+    - name: default
+      actions:
+        - set: 'soundpack_num = 0' 
+        - sendText: > 
+                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/intro.mp3"/>
+                " Youre soundpack has been changed to default. "
+                " Are you ready to practice some intervals? "
+        - getInput:
+      next:
+        ok_great: Question
+
         
+    - name: Retro
+      actions:
+        - set: 'soundpack_num = 1' 
+        - sendText: > 
+                <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/intro.mp3"/>
+                " Youre soundpack has been changed to retro. "
+                " Are you ready to practice some intervals? "
+        - getInput:
+      next:
+        ok_great: Question
+
+    
+  
+  
+  
+  
+  
     # If the user asks to skip a question    
     - name: Next Question
       entrypoint: true
@@ -250,8 +310,8 @@ scenario:
       actions:
         - sendText: "Ok, heres the interval again."
         - sendText: >  
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[first_random_interval].question }}.mp3"/>
-               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/{{ interval[second_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/{{ interval[first_random_interval].question }}.mp3"/>
+               <audio src="https://onlinepiano1.s3-us-west-1.amazonaws.com/Soundpack{{ soundpack_num }}/{{ interval[second_random_interval].question }}.mp3"/>
         - getInput:
       next: 
         answer_intent: Check Answer
